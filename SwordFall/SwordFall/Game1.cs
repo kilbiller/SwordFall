@@ -23,11 +23,14 @@ namespace SwordFall
 
         SpriteFont font;
         Player player;
-        Sword sword1;
+
+        List<Sword> swords = new List<Sword>();
+
+        Random random = new Random();
+        int randX;
 
         // At the top of your class:
         Texture2D pixel;
-        Color color;
 
         public Game1()
         {
@@ -50,9 +53,20 @@ namespace SwordFall
             player = new Player(viewport);
             player.Initialize();
 
-            sword1 = new Sword();
-            sword1.Initialize();
+            /*sword1 = new Sword();
+            sword1.Initialize();*/
 
+
+            for (int i = 0; i < 10; i++)
+            {
+                randX = random.Next(1, 500);
+                swords.Add(new Sword(randX));
+            }
+
+            foreach(Sword sword in swords)
+                sword.Initialize();
+
+           
             base.Initialize();
         }
 
@@ -66,7 +80,11 @@ namespace SwordFall
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             player.LoadContent(Content, "hero");
-            sword1.LoadContent(Content, "sword");
+
+            foreach (Sword sword in swords)
+                sword.LoadContent(Content, "sword");
+            //sword1.LoadContent(Content, "sword");
+
             font = Content.Load<SpriteFont>("SpriteFont1");
 
             // Somewhere in your LoadContent() method:
@@ -96,15 +114,26 @@ namespace SwordFall
                 this.Exit();
 
             player.Update(gameTime);
+            //sword1.Update(gameTime);
 
-            if (player.positionRectangle.Intersects(sword1.positionRectangle))
+            foreach (Sword sword in swords)
+                sword.Update(gameTime);
+
+
+            foreach (Sword sword in swords)
             {
-                //player.alive = (player.alive) ? player.alive = false : player.alive = true;
-                player.alive = false;
-                color = Color.Red;
+                if(player.positionRectangle.Intersects(sword.positionRectangle))
+                {
+                    player.isTouching = true;
+                    sword.isTouching = true;
+                    player.isAlive = false;
+                }
+                else
+                {
+                    sword.isTouching = false;
+                }
+
             }
-            else
-                color = Color.LightGreen;
 
             base.Update(gameTime);
         }
@@ -151,16 +180,28 @@ namespace SwordFall
 
             //Texts
             spriteBatch.DrawString(font, "Hit the sword.", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), Color.WhiteSmoke);
-            if (!player.alive)
+            if (!player.isAlive)
                 spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
             
             //Player
-            player.Draw(spriteBatch, gameTime);
-            DrawBorder(player.positionRectangle, 1, color);
+
+            player.Draw(spriteBatch);
+            if (!player.isTouching)
+                DrawBorder(player.positionRectangle, 1, Color.LightGreen);
+            else
+                DrawBorder(player.positionRectangle, 1, Color.Red);
+
+            player.isTouching = false;
 
             //Sword
-            sword1.Draw(spriteBatch, gameTime);
-            DrawBorder(sword1.positionRectangle, 1, color);
+            foreach (Sword sword in swords)
+            {
+                sword.Draw(spriteBatch);
+                if(!sword.isTouching)
+                    DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
+                else
+                    DrawBorder(sword.positionRectangle, 1, Color.Red);
+            }
 
             spriteBatch.End();
 

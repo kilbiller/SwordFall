@@ -30,7 +30,8 @@ namespace SwordFall
         //Player
         private float playerScale; //Grossissement
         private float runningSpeed;
-        public bool alive;
+        public bool isAlive;
+        public bool isTouching;
 
         //Jump
         bool isJumping;
@@ -47,7 +48,8 @@ namespace SwordFall
             height = 48;
             playerScale = 1f;
             runningSpeed = 0.3f;
-            alive = true;
+            isAlive = true;
+            isTouching = false;
 
             //Animation
             frame = 1;
@@ -65,7 +67,7 @@ namespace SwordFall
         public override void LoadContent(ContentManager content, string assetName)
         {
             base.LoadContent(content, assetName);
-            position = new Vector2(100, 150);
+            position = new Vector2(100, 400);
         }
 
         public void Animate(GameTime gameTime)
@@ -155,7 +157,7 @@ namespace SwordFall
                     
         }
 
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, position, new Rectangle((frame - 1) * width, 0, width, height), Color.White, 0f, Vector2.Zero, playerScale, effect, 0f);
         }

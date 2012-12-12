@@ -62,7 +62,7 @@ namespace SwordFall
         /// </summary>
         /// <param name="spriteBatch">Le spritebatch avec lequel dessiner</param>
         /// <param name="gameTime">Le GameTime de la frame</param>
-        public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public virtual void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, position, Color.White);
         }
