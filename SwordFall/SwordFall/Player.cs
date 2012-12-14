@@ -83,8 +83,8 @@ namespace SwordFall
 
         public override void Update(GameTime gameTime)
         {
-            //formule de position de la classe Sprite //Mettre avant pour pas avoir un saut qui rentre un peu dans la sol
-            base.Update(gameTime);
+            //Formule de position de la classe Sprite //Mettre avant pour pas avoir un saut qui rentre un peu dans la sol
+            position += velocity * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
             // On récupère les états du clavier et de la souris.
             keyboardState = Keyboard.GetState();
@@ -133,7 +133,7 @@ namespace SwordFall
                 }
             }
 
-            //gravité
+            //gravity force
             //if (isJumping)
                 velocity.Y += gravity;
 

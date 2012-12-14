@@ -19,13 +19,13 @@ namespace SwordFall
         public Texture2D texture { get; set; }
 
         // Récupère ou définit la position du Sprite
-        public Vector2 position;// { get; set; }
+        public Vector2 position = Vector2.Zero;// { get; set; }
 
         public int width { get; protected set; } //Protected car ne doit
         public int height { get; protected set; } //pas être changer par le jeu
 
         // Récupère ou définit la vitesse de déplacement du sprite.
-        public Vector2 velocity;// { get; set; }
+        public Vector2 velocity = Vector2.Zero;// { get; set; }
 
         public Rectangle positionRectangle
         {
@@ -33,13 +33,6 @@ namespace SwordFall
             {
                 return new Rectangle((int)position.X, (int)position.Y, width, height);
             }
-        }
-
-        // Initialise les variables du Sprite
-        public virtual void Initialize()
-        {
-            position = Vector2.Zero;
-            velocity = Vector2.Zero;
         }
 
         // Charge l'image voulue grâce au ContentManager donné

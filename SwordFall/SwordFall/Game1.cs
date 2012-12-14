@@ -51,21 +51,12 @@ namespace SwordFall
             viewport = graphics.GraphicsDevice.Viewport;
 
             player = new Player(viewport);
-            player.Initialize();
 
-            /*sword1 = new Sword();
-            sword1.Initialize();*/
-
-
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 15; i++)
             {
-                randX = random.Next(1, 500);
-                swords.Add(new Sword(randX));
+                randX = random.Next(1, viewport.Width-31);
+                swords.Add(new Sword(viewport, randX));
             }
-
-            foreach(Sword sword in swords)
-                sword.Initialize();
-
            
             base.Initialize();
         }
@@ -83,7 +74,6 @@ namespace SwordFall
 
             foreach (Sword sword in swords)
                 sword.LoadContent(Content, "sword");
-            //sword1.LoadContent(Content, "sword");
 
             font = Content.Load<SpriteFont>("SpriteFont1");
 
@@ -114,12 +104,12 @@ namespace SwordFall
                 this.Exit();
 
             player.Update(gameTime);
-            //sword1.Update(gameTime);
 
             foreach (Sword sword in swords)
                 sword.Update(gameTime);
 
-
+            //Debug boxes
+            player.isTouching = false;
             foreach (Sword sword in swords)
             {
                 if(player.positionRectangle.Intersects(sword.positionRectangle))
@@ -129,12 +119,9 @@ namespace SwordFall
                     player.isAlive = false;
                 }
                 else
-                {
                     sword.isTouching = false;
-                }
-
             }
-
+            
             base.Update(gameTime);
         }
 
@@ -184,23 +171,20 @@ namespace SwordFall
                 spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
             
             //Player
-
             player.Draw(spriteBatch);
             if (!player.isTouching)
                 DrawBorder(player.positionRectangle, 1, Color.LightGreen);
             else
                 DrawBorder(player.positionRectangle, 1, Color.Red);
 
-            player.isTouching = false;
-
-            //Sword
+            //Swords
             foreach (Sword sword in swords)
             {
-                sword.Draw(spriteBatch);
-                if(!sword.isTouching)
-                    DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
-                else
-                    DrawBorder(sword.positionRectangle, 1, Color.Red);
+                    sword.Draw(spriteBatch);
+                    if (!sword.isTouching)
+                        DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
+                    else
+                        DrawBorder(sword.positionRectangle, 1, Color.Red);
             }
 
             spriteBatch.End();
