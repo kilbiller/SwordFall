@@ -14,6 +14,7 @@ TODO :
 
 Optionnel :
 - Améliorer algo épée qui tombent
-- Ajouter des niveaux
+- Ajouter des niveaux OU Choix difficulté (Easy, Medium, Hard)
 - Optimiser le code
 - Ecran de démarrage
+- Pause
