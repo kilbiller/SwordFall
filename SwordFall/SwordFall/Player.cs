@@ -15,8 +15,6 @@ namespace SwordFall
 {
     public class Player : Sprite
     {
-        private Viewport viewport;
-
         //Input
         KeyboardState keyboardState,previousKeyboardState;
         MouseState mouseState;
@@ -39,10 +37,8 @@ namespace SwordFall
         int jumpNumber;
         int maxJump;
 
-        public Player(Viewport _viewport)
+        public Player()
         {
-            this.viewport = _viewport;
-
             //Player
             width = 36;
             height = 48;
@@ -61,7 +57,6 @@ namespace SwordFall
             gravity = 0.02f;
             jumpNumber = 0;
             maxJump = 1;
-            
         }
 
         public override void LoadContent(ContentManager content, string assetName)
@@ -95,24 +90,16 @@ namespace SwordFall
             //Le else permet d'empecher le déplacement diagonal
             if (keyboardState.IsKeyDown(Keys.Q))
             {
-                if (position.X > 0)
-                {
-                    velocity.X = -runningSpeed;
-                }
-                else
-                    velocity.X = 0f;
+                velocity.X = -runningSpeed;
+                //velocity.X = -(float)gameTime.ElapsedGameTime.TotalMilliseconds/60;
 
                 effect = SpriteEffects.FlipHorizontally;
                 Animate(gameTime);
             }
             else if (keyboardState.IsKeyDown(Keys.D))
             {
-                if ((position.X + width * playerScale) < viewport.Width)
-                {
-                    velocity.X = runningSpeed;
-                }
-                else
-                    velocity.X = 0f;
+                velocity.X = runningSpeed;
+                //velocity.X = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 60;
 
                 effect = SpriteEffects.None;
                 Animate(gameTime);
@@ -137,15 +124,6 @@ namespace SwordFall
             //if (isJumping)
                 velocity.Y += gravity;
 
-            //Retombe au sol
-            if (position.Y + height*playerScale > viewport.Height)
-            {
-                position.Y = viewport.Height - height * playerScale; //Replace bien le personnage sur le sol
-                isJumping = false; //le personnage n'est plus en train de sauter
-                velocity.Y = 0f; //donc pas de vitesse verticale
-                jumpNumber = 0;
-            }
-
             //Idle Animation
             if (keyboardState.IsKeyUp(Keys.Q) && keyboardState.IsKeyUp(Keys.D) && !isJumping)
             {
@@ -153,8 +131,23 @@ namespace SwordFall
                 frame = 1;
             }
 
+
             previousKeyboardState = keyboardState;
                     
+        }
+
+        //Collisions
+        public void Collision(int viewportWidth, int viewportHeight)
+        {
+            if (position.X < 0) position.X = 0; //Gauche
+            if ((position.X + width * playerScale) > viewportWidth) position.X = viewportWidth - (width * playerScale); // Droite
+            if (position.Y + height * playerScale > viewportHeight) //Sol
+            {
+                position.Y = viewportHeight - (height * playerScale);
+                isJumping = false; //le personnage n'est plus en train de sauter
+                velocity.Y = 0f; //donc pas de vitesse verticale
+                jumpNumber = 0;
+            }
         }
 
         public override void Draw(SpriteBatch spriteBatch)

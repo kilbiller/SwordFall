@@ -16,44 +16,56 @@ namespace SwordFall
 
     class Sword : Sprite
     {
-
-        Viewport viewport;
         float gravity;
-        int posX;
 
         public bool isTouching;
         public bool isVisible;
+        public double timer;
 
-        public Sword(Viewport _viewport, int _posX)
+        public Sword()
         {
             width = 31;
             height = 124;
             gravity = 0.008f;
-            this.posX = _posX;
             isTouching = false;
-            isVisible = true;
-            this.viewport = _viewport;
+            isVisible = false;
+            timer = 0;
         }
 
         public override void LoadContent(ContentManager content, string assetName)
         {
             base.LoadContent(content, assetName);
-            position = new Vector2(posX, -(height + 10));
+            position = new Vector2(0, 100000); // Pour ne pas reset au début
         }
 
-        public override void Update(GameTime gameTime)
+        public void Update(GameTime gameTime, int randTimer, int randX)
         {
-            //Formule de position de la classe Sprite //Mettre avant pour pas avoir un saut qui rentre un peu dans la sol
+            //Formule de position de la classe Sprite 
             position += velocity * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
             velocity.Y += gravity;
 
-            //Si traverse le sol
-            if (position.Y - 10 > viewport.Height)
+            if(!isVisible)
             {
-                //isVisible = false;
-                position = new Vector2(posX, -(height + 10));
-                velocity.Y = 0;
+                timer += gameTime.ElapsedGameTime.TotalMilliseconds;
+
+                if (timer > randTimer)
+                {
+                    position = new Vector2(randX, -(height + 10));
+                    velocity.Y = 0;
+                    isVisible = true;
+                    timer = 0;
+                }
+            }
+
+        }
+
+        public void Collision(int viewportWidth, int viewportHeight)
+        {
+            //Si traverse le sol
+            if (position.Y - 10 > viewportHeight)
+            {
+                isVisible = false;
             }
         }
 

@@ -26,8 +26,7 @@ namespace SwordFall
 
         List<Sword> swords = new List<Sword>();
 
-        Random random = new Random();
-        int randX;
+        public Random random = new Random();
 
         // At the top of your class:
         Texture2D pixel;
@@ -40,31 +39,18 @@ namespace SwordFall
             //graphics.IsFullScreen = true;
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
         protected override void Initialize()
         {
             viewport = graphics.GraphicsDevice.Viewport;
 
-            player = new Player(viewport);
+            player = new Player();
 
             for (int i = 0; i < 15; i++)
-            {
-                randX = random.Next(1, viewport.Width-31);
-                swords.Add(new Sword(viewport, randX));
-            }
+                swords.Add(new Sword());
            
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
@@ -83,30 +69,22 @@ namespace SwordFall
 
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
-        }
-
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Escape))
                 this.Exit();
 
+            //Player Logic
             player.Update(gameTime);
+            player.Collision(viewport.Width, viewport.Height);
 
+            //Sword Logic
             foreach (Sword sword in swords)
-                sword.Update(gameTime);
+            {
+                sword.Update(gameTime, random.Next(0,5000), random.Next(1, viewport.Width-31) );
+                sword.Collision(viewport.Width, viewport.Height);
+            }
 
             //Debug boxes
             player.isTouching = false;
@@ -125,15 +103,6 @@ namespace SwordFall
             base.Update(gameTime);
         }
 
-
-        /// <summary>
-        /// Will draw a border (hollow rectangle) of the given 'thicknessOfBorder' (in pixels)
-        /// of the specified color.
-        ///
-        /// By Sean Colombo, from http://bluelinegamestudios.com/blog
-        /// </summary>
-        /// <param name="rectangleToDraw"></param>
-        /// <param name="thicknessOfBorder"></param>
         private void DrawBorder(Rectangle rectangleToDraw, int thicknessOfBorder, Color borderColor)
         {
             // Draw top line
@@ -154,10 +123,6 @@ namespace SwordFall
                                             thicknessOfBorder), borderColor);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
             //GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -166,7 +131,7 @@ namespace SwordFall
             spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
 
             //Texts
-            spriteBatch.DrawString(font, "Hit the sword.", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), Color.WhiteSmoke);
+            spriteBatch.DrawString(font, "Stay away from the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), Color.WhiteSmoke);
             if (!player.isAlive)
                 spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
             
@@ -177,14 +142,19 @@ namespace SwordFall
             else
                 DrawBorder(player.positionRectangle, 1, Color.Red);
 
+            int i = 1;
             //Swords
             foreach (Sword sword in swords)
             {
-                    sword.Draw(spriteBatch);
-                    if (!sword.isTouching)
-                        DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
-                    else
-                        DrawBorder(sword.positionRectangle, 1, Color.Red);
+                sword.Draw(spriteBatch);
+                if (!sword.isTouching)
+                    DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
+                else
+                    DrawBorder(sword.positionRectangle, 1, Color.Red);
+
+                string swordText = "Sword " + i + " : " + sword.timer.ToString();
+                spriteBatch.DrawString(font, swordText, new Vector2(2, 1+(i*15)), Color.WhiteSmoke);
+                i++;
             }
 
             spriteBatch.End();
