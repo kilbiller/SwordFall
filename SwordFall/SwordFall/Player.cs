@@ -36,6 +36,8 @@ namespace SwordFall
         float gravity;
         int jumpNumber;
         int maxJump;
+        private SoundEffect jumping;
+        SoundEffectInstance jumpingInstance;
 
         public Player()
         {
@@ -63,6 +65,10 @@ namespace SwordFall
         {
             base.LoadContent(content, assetName);
             position = new Vector2(100, 400);
+
+            //Son du saut
+            jumping = content.Load<SoundEffect>("jumping");
+            jumpingInstance = jumping.CreateInstance();
         }
 
         public void Animate(GameTime gameTime)
@@ -117,6 +123,9 @@ namespace SwordFall
                         isJumping = true;
                     position.Y -= 1f; //Pour pas bloquer le saut si la gravité est constamment active
                     velocity.Y = -0.5f;
+                    //SoundEffect
+                    jumpingInstance.Volume = 0.7f;
+                    jumpingInstance.Play();
                 }
             }
 

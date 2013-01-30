@@ -31,6 +31,9 @@ namespace SwordFall
         // At the top of your class:
         Texture2D pixel;
 
+        Song bloody_tears;
+        bool songstart = false;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -47,7 +50,7 @@ namespace SwordFall
 
             for (int i = 0; i < 15; i++)
                 swords.Add(new Sword());
-           
+
             base.Initialize();
         }
 
@@ -66,6 +69,9 @@ namespace SwordFall
             // Somewhere in your LoadContent() method:
             pixel = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             pixel.SetData(new[] { Color.White }); // so that we can draw whatever color we want on top of it
+
+            bloody_tears = Content.Load<Song>("Bloody tears");
+            MediaPlayer.IsRepeating = true; 
 
         }
 
@@ -98,6 +104,13 @@ namespace SwordFall
                 }
                 else
                     sword.isTouching = false;
+            }
+
+            //Background Music
+            if (!songstart)
+            {
+                MediaPlayer.Play(bloody_tears);
+                songstart = true;
             }
             
             base.Update(gameTime);
