@@ -34,6 +34,11 @@ namespace SwordFall
         Song bloody_tears;
         bool songstart = false;
 
+        bool showRule = true;
+        Color ruleColor = new Color(245, 245, 255, 255);
+
+        Texture2D background_corridor;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -66,12 +71,17 @@ namespace SwordFall
 
             font = Content.Load<SpriteFont>("SpriteFont1");
 
-            // Somewhere in your LoadContent() method:
+            //Debug boxes
             pixel = new Texture2D(graphics.GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             pixel.SetData(new[] { Color.White }); // so that we can draw whatever color we want on top of it
 
+            //Background music
             bloody_tears = Content.Load<Song>("Bloody tears");
-            MediaPlayer.IsRepeating = true; 
+            MediaPlayer.IsRepeating = true;
+
+            //Castle corridor background
+
+            background_corridor = Content.Load<Texture2D>("background_corridor");
 
         }
 
@@ -112,6 +122,14 @@ namespace SwordFall
                 MediaPlayer.Play(bloody_tears);
                 songstart = true;
             }
+
+            //Rules
+            if (gameTime.TotalGameTime.Seconds > 1)
+            {
+                ruleColor *= 0.98f;
+                if(ruleColor.A == 0)
+                    showRule = false;
+            }
             
             base.Update(gameTime);
         }
@@ -141,12 +159,17 @@ namespace SwordFall
             //GraphicsDevice.Clear(Color.CornflowerBlue);
             GraphicsDevice.Clear(Color.Gray);
 
-            spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            //spriteBatch.Begin(SpriteSortMode.BackToFront, BlendState.AlphaBlend);
+            spriteBatch.Begin();
+
+            //Background
+            spriteBatch.Draw(background_corridor, background_corridor.Bounds, Color.White);
 
             //Texts
-            spriteBatch.DrawString(font, "Stay away from the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), Color.WhiteSmoke);
-            if (!player.isAlive)
-                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
+            if(showRule)
+                spriteBatch.DrawString(font, "Stay away from the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), ruleColor);
+            /*if (!player.isAlive)
+                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);*/
             
             //Player
             player.Draw(spriteBatch);

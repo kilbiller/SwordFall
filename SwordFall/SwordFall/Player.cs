@@ -82,6 +82,21 @@ namespace SwordFall
                 }
         }
 
+        public void Jump()
+        {
+            if (!isJumping)
+            {
+                jumpNumber++;
+                if (jumpNumber == maxJump)
+                    isJumping = true;
+                position.Y -= 1f; //Pour pas bloquer le saut si la gravité est constamment active
+                velocity.Y = -0.5f;
+                //SoundEffect
+                jumpingInstance.Volume = 0.7f;
+                jumpingInstance.Play();
+            }
+        }
+
         public override void Update(GameTime gameTime)
         {
             //Formule de position de la classe Sprite //Mettre avant pour pas avoir un saut qui rentre un peu dans la sol
@@ -92,12 +107,10 @@ namespace SwordFall
             mouseState = Mouse.GetState();
 
             //Mouvement
-
             //Le else permet d'empecher le déplacement diagonal
             if (keyboardState.IsKeyDown(Keys.Q))
             {
                 velocity.X = -runningSpeed;
-                //velocity.X = -(float)gameTime.ElapsedGameTime.TotalMilliseconds/60;
 
                 effect = SpriteEffects.FlipHorizontally;
                 Animate(gameTime);
@@ -105,7 +118,6 @@ namespace SwordFall
             else if (keyboardState.IsKeyDown(Keys.D))
             {
                 velocity.X = runningSpeed;
-                //velocity.X = (float)gameTime.ElapsedGameTime.TotalMilliseconds / 60;
 
                 effect = SpriteEffects.None;
                 Animate(gameTime);
@@ -114,23 +126,10 @@ namespace SwordFall
                 velocity.X = 0f;
 
             //Jump
-            if (!isJumping)
-            {
-                if (keyboardState.IsKeyDown(Keys.Space) && !previousKeyboardState.IsKeyDown(Keys.Space))
-                {
-                    jumpNumber++;
-                    if (jumpNumber == maxJump)
-                        isJumping = true;
-                    position.Y -= 1f; //Pour pas bloquer le saut si la gravité est constamment active
-                    velocity.Y = -0.5f;
-                    //SoundEffect
-                    jumpingInstance.Volume = 0.7f;
-                    jumpingInstance.Play();
-                }
-            }
+            if (keyboardState.IsKeyDown(Keys.Space) && !previousKeyboardState.IsKeyDown(Keys.Space))
+                Jump();
 
-            //gravity force
-            //if (isJumping)
+            //Gravity Pull
                 velocity.Y += gravity;
 
             //Idle Animation
@@ -140,9 +139,7 @@ namespace SwordFall
                 frame = 1;
             }
 
-
-            previousKeyboardState = keyboardState;
-                    
+            previousKeyboardState = keyboardState;     
         }
 
         //Collisions

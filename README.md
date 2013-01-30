@@ -7,7 +7,7 @@ TODO :
 - Multiples épées qui tombent à l'infini
 - Mort du joueur
 - Score
-- Background
+- <strike>Background</strike>
 - Musique d'ambiance
 - Son de mort et de saut
 - BugFix
