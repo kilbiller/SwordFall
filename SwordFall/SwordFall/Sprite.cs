@@ -60,6 +60,56 @@ namespace SwordFall
             spriteBatch.Draw(texture, position, Color.White);
         }
 
+        public bool CollidesWith(Sprite other, bool calcPerPixel = true)
+        {
+            // Get dimensions of texture
+            int widthOther = other.texture.Width;
+            int heightOther = other.texture.Height;
+            int widthMe = texture.Width;
+            int heightMe = texture.Height;
+
+            // if we need per pixel // at least avoid doing it // for small sizes (nobody will notice :P)
+            if (calcPerPixel && ((Math.Min(widthOther, heightOther) > 10) || (Math.Min(widthMe, heightMe) > 10)))
+            {
+                // If simple intersection fails, don't even bother with per-pixel
+                return positionRectangle.Intersects(other.positionRectangle) && PerPixelCollision(this, other);
+            }
+
+            return positionRectangle.Intersects(other.positionRectangle);
+        }
+
+        static bool PerPixelCollision(Sprite a, Sprite b)
+        {
+            // Get Color data of each Texture
+            Color[] bitsA = new Color[a.texture.Width * a.texture.Height];
+            a.texture.GetData(bitsA);
+            Color[] bitsB = new Color[b.texture.Width * b.texture.Height];
+            b.texture.GetData(bitsB);
+
+            // Calculate the intersecting rectangle
+            int x1 = Math.Max(a.positionRectangle.X, b.positionRectangle.X);
+            int x2 = Math.Min(a.positionRectangle.X + a.positionRectangle.Width, b.positionRectangle.X + b.positionRectangle.Width);
+
+            int y1 = Math.Max(a.positionRectangle.Y, b.positionRectangle.Y);
+            int y2 = Math.Min(a.positionRectangle.Y + a.positionRectangle.Height, b.positionRectangle.Y + b.positionRectangle.Height);
+
+            // For each single pixel in the intersecting rectangle
+            for (int y = y1; y < y2; ++y)
+            {
+                for (int x = x1; x < x2; ++x)
+                {
+                    // Get the color from each texture
+                    Color ac = bitsA[(x - a.positionRectangle.X) + (y - a.positionRectangle.Y) * a.texture.Width];
+                    Color bc = bitsB[(x - b.positionRectangle.X) + (y - b.positionRectangle.Y) * b.texture.Width];
+
+                    if (ac.A != 0 && bc.A != 0) // If both colors are not transparent (the alpha channel is not 0), then there is a collision
+                        return true;
+                }
+            }
+            // If no collision occurred by now, we're clear.
+            return false;
+        }
+
     }
 
 

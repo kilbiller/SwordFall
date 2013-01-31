@@ -39,12 +39,16 @@ namespace SwordFall
 
         Texture2D background_corridor;
 
+        //Constantes
+        int swordNumber = 16;
+        int maxRespawnTime = 20000; //Delais max pour le random du respawn des épée (en s)
+        //Debug
+        bool Debug = false;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            //Jeu en Fullscreen
-            //graphics.IsFullScreen = true;
         }
 
         protected override void Initialize()
@@ -53,8 +57,8 @@ namespace SwordFall
 
             player = new Player();
 
-            for (int i = 0; i < 15; i++)
-                swords.Add(new Sword());
+            for (int i = 0; i < swordNumber; i++)
+                swords.Add(new Sword(i*50));
 
             base.Initialize();
         }
@@ -80,7 +84,6 @@ namespace SwordFall
             MediaPlayer.IsRepeating = true;
 
             //Castle corridor background
-
             background_corridor = Content.Load<Texture2D>("background_corridor");
 
         }
@@ -98,15 +101,14 @@ namespace SwordFall
             //Sword Logic
             foreach (Sword sword in swords)
             {
-                sword.Update(gameTime, random.Next(0,5000), random.Next(1, viewport.Width-31) );
+                sword.Update(gameTime, random.Next(0, maxRespawnTime));
                 sword.Collision(viewport.Width, viewport.Height);
             }
 
-            //Debug boxes
-            player.isTouching = false;
+            //Per Pixel collision with swords
             foreach (Sword sword in swords)
             {
-                if(player.positionRectangle.Intersects(sword.positionRectangle))
+                if (player.CollidesWith(sword))
                 {
                     player.isTouching = true;
                     sword.isTouching = true;
@@ -166,31 +168,38 @@ namespace SwordFall
             spriteBatch.Draw(background_corridor, background_corridor.Bounds, Color.White);
 
             //Texts
-            if(showRule)
+            if (showRule)
                 spriteBatch.DrawString(font, "Stay away from the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), ruleColor);
-            /*if (!player.isAlive)
-                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);*/
+            if (!player.isAlive)
+                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
             
             //Player
             player.Draw(spriteBatch);
-            if (!player.isTouching)
-                DrawBorder(player.positionRectangle, 1, Color.LightGreen);
-            else
-                DrawBorder(player.positionRectangle, 1, Color.Red);
+            if (Debug)
+            {
+                if (!player.isTouching)
+                    DrawBorder(player.positionRectangle, 1, Color.LightGreen);
+                else
+                    DrawBorder(player.positionRectangle, 1, Color.Red);
+            }
 
             int i = 1;
             //Swords
             foreach (Sword sword in swords)
             {
                 sword.Draw(spriteBatch);
-                if (!sword.isTouching)
-                    DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
-                else
-                    DrawBorder(sword.positionRectangle, 1, Color.Red);
 
-                string swordText = "Sword " + i + " : " + sword.timer.ToString();
-                spriteBatch.DrawString(font, swordText, new Vector2(2, 1+(i*15)), Color.WhiteSmoke);
-                i++;
+                if (Debug)
+                {
+                    if (!sword.isTouching)
+                        DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
+                    else
+                        DrawBorder(sword.positionRectangle, 1, Color.Red);
+
+                    string swordDebugText = "Sword " + i + " : " + sword.timer.ToString();
+                    spriteBatch.DrawString(font, swordDebugText, new Vector2(2, 1 + (i * 15)), Color.WhiteSmoke);
+                    i++;
+                }
             }
 
             spriteBatch.End();

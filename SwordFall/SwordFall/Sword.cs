@@ -22,7 +22,9 @@ namespace SwordFall
         public bool isVisible;
         public double timer;
 
-        public Sword()
+        int posX;
+
+        public Sword(int _posX)
         {
             width = 31;
             height = 124;
@@ -30,6 +32,7 @@ namespace SwordFall
             isTouching = false;
             isVisible = false;
             timer = 0;
+            posX = _posX;
         }
 
         public override void LoadContent(ContentManager content, string assetName)
@@ -38,7 +41,7 @@ namespace SwordFall
             position = new Vector2(0, 100000); // Pour ne pas reset au début
         }
 
-        public void Update(GameTime gameTime, int randTimer, int randX)
+        public void Update(GameTime gameTime, int randTimer)
         {
             //Formule de position de la classe Sprite 
             position += velocity * (float)gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -51,7 +54,7 @@ namespace SwordFall
 
                 if (timer > randTimer)
                 {
-                    position = new Vector2(randX, -(height + 10));
+                    position = new Vector2(posX, -(height + 10));
                     velocity.Y = 0;
                     isVisible = true;
                     timer = 0;
@@ -64,9 +67,7 @@ namespace SwordFall
         {
             //Si traverse le sol
             if (position.Y - 10 > viewportHeight)
-            {
                 isVisible = false;
-            }
         }
 
     }
