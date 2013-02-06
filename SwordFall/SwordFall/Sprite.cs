@@ -27,7 +27,7 @@ namespace SwordFall
         // Récupère ou définit la vitesse de déplacement du sprite.
         public Vector2 velocity = Vector2.Zero;// { get; set; }
 
-        public Rectangle positionRectangle
+        public Rectangle bounds
         {
             get
             {
@@ -72,10 +72,10 @@ namespace SwordFall
             if (calcPerPixel && ((Math.Min(widthOther, heightOther) > 10) || (Math.Min(widthMe, heightMe) > 10)))
             {
                 // If simple intersection fails, don't even bother with per-pixel
-                return positionRectangle.Intersects(other.positionRectangle) && PerPixelCollision(this, other);
+                return bounds.Intersects(other.bounds) && PerPixelCollision(this, other);
             }
 
-            return positionRectangle.Intersects(other.positionRectangle);
+            return bounds.Intersects(other.bounds);
         }
 
         static bool PerPixelCollision(Sprite a, Sprite b)
@@ -87,11 +87,11 @@ namespace SwordFall
             b.texture.GetData(bitsB);
 
             // Calculate the intersecting rectangle
-            int x1 = Math.Max(a.positionRectangle.X, b.positionRectangle.X);
-            int x2 = Math.Min(a.positionRectangle.X + a.positionRectangle.Width, b.positionRectangle.X + b.positionRectangle.Width);
+            int x1 = Math.Max(a.bounds.X, b.bounds.X);
+            int x2 = Math.Min(a.bounds.X + a.bounds.Width, b.bounds.X + b.bounds.Width);
 
-            int y1 = Math.Max(a.positionRectangle.Y, b.positionRectangle.Y);
-            int y2 = Math.Min(a.positionRectangle.Y + a.positionRectangle.Height, b.positionRectangle.Y + b.positionRectangle.Height);
+            int y1 = Math.Max(a.bounds.Y, b.bounds.Y);
+            int y2 = Math.Min(a.bounds.Y + a.bounds.Height, b.bounds.Y + b.bounds.Height);
 
             // For each single pixel in the intersecting rectangle
             for (int y = y1; y < y2; ++y)
@@ -99,8 +99,8 @@ namespace SwordFall
                 for (int x = x1; x < x2; ++x)
                 {
                     // Get the color from each texture
-                    Color ac = bitsA[(x - a.positionRectangle.X) + (y - a.positionRectangle.Y) * a.texture.Width];
-                    Color bc = bitsB[(x - b.positionRectangle.X) + (y - b.positionRectangle.Y) * b.texture.Width];
+                    Color ac = bitsA[(x - a.bounds.X) + (y - a.bounds.Y) * a.texture.Width];
+                    Color bc = bitsB[(x - b.bounds.X) + (y - b.bounds.Y) * b.texture.Width];
 
                     if (ac.A != 0 && bc.A != 0) // If both colors are not transparent (the alpha channel is not 0), then there is a collision
                         return true;

@@ -39,9 +39,11 @@ namespace SwordFall
 
         Texture2D background_corridor;
 
+        FPSCounter fpsCounter;
+
         //Constantes
         int swordNumber = 16;
-        int maxRespawnTime = 20000; //Delais max pour le random du respawn des épée (en s)
+        int maxRespawnTime = 15000; //Delais max pour le random du respawn des épée (en s)
         //Debug
         bool Debug = false;
 
@@ -59,6 +61,8 @@ namespace SwordFall
 
             for (int i = 0; i < swordNumber; i++)
                 swords.Add(new Sword(i*50));
+
+            fpsCounter = new FPSCounter();
 
             base.Initialize();
         }
@@ -86,6 +90,9 @@ namespace SwordFall
             //Castle corridor background
             background_corridor = Content.Load<Texture2D>("background_corridor");
 
+            //FPS counter
+            fpsCounter.LoadContent(Content);
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -94,44 +101,57 @@ namespace SwordFall
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState(PlayerIndex.One).IsKeyDown(Keys.Escape))
                 this.Exit();
 
-            //Player Logic
-            player.Update(gameTime);
-            player.Collision(viewport.Width, viewport.Height);
-
-            //Sword Logic
-            foreach (Sword sword in swords)
+            if (player.isAlive)
             {
-                sword.Update(gameTime, random.Next(0, maxRespawnTime));
-                sword.Collision(viewport.Width, viewport.Height);
-            }
 
-            //Per Pixel collision with swords
-            foreach (Sword sword in swords)
-            {
-                if (player.CollidesWith(sword))
+                //Player Logic
+                player.Update(gameTime);
+                player.Collision(viewport.Width, viewport.Height);
+
+                //Sword Logic
+                foreach (Sword sword in swords)
                 {
-                    player.isTouching = true;
-                    sword.isTouching = true;
-                    player.isAlive = false;
+                    sword.Update(gameTime, random.Next(0, maxRespawnTime));
+                    sword.Collision(viewport.Width, viewport.Height);
                 }
-                else
-                    sword.isTouching = false;
-            }
 
-            //Background Music
-            if (!songstart)
+                //Per Pixel collision with swords
+                player.isTouching = false;
+                foreach (Sword sword in swords)
+                {
+                    if (player.CollidesWith(sword))
+                    {
+                        player.isTouching = true;
+                        sword.isTouching = true;
+                        player.isAlive = false;
+                    }
+                    else
+                        sword.isTouching = false;
+                }
+
+                //Background Music
+                if (!songstart)
+                {
+                    MediaPlayer.Play(bloody_tears);
+                    songstart = true;
+                }
+            }
+            else
             {
-                MediaPlayer.Play(bloody_tears);
-                songstart = true;
+                MediaPlayer.Stop();
+                songstart = false;
             }
 
-            //Rules
+            //Rules fading
             if (gameTime.TotalGameTime.Seconds > 1)
             {
                 ruleColor *= 0.98f;
                 if(ruleColor.A == 0)
                     showRule = false;
             }
+
+            //FPS Counter
+            fpsCounter.Update(gameTime);
             
             base.Update(gameTime);
         }
@@ -166,21 +186,19 @@ namespace SwordFall
 
             //Background
             spriteBatch.Draw(background_corridor, background_corridor.Bounds, Color.White);
+                
 
-            //Texts
-            if (showRule)
-                spriteBatch.DrawString(font, "Stay away from the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), ruleColor);
-            if (!player.isAlive)
-                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
+            //FPS Counter
+            fpsCounter.Draw(spriteBatch);
             
             //Player
             player.Draw(spriteBatch);
             if (Debug)
             {
                 if (!player.isTouching)
-                    DrawBorder(player.positionRectangle, 1, Color.LightGreen);
+                    DrawBorder(player.bounds, 1, Color.LightGreen);
                 else
-                    DrawBorder(player.positionRectangle, 1, Color.Red);
+                    DrawBorder(player.bounds, 1, Color.Red);
             }
 
             int i = 1;
@@ -192,14 +210,27 @@ namespace SwordFall
                 if (Debug)
                 {
                     if (!sword.isTouching)
-                        DrawBorder(sword.positionRectangle, 1, Color.LightGreen);
+                        DrawBorder(sword.bounds, 1, Color.LightGreen);
                     else
-                        DrawBorder(sword.positionRectangle, 1, Color.Red);
+                        DrawBorder(sword.bounds, 1, Color.Red);
 
-                    string swordDebugText = "Sword " + i + " : " + sword.timer.ToString();
+                    string swordDebugText = string.Format("Sword {0} : {1}", i, sword.timer);
                     spriteBatch.DrawString(font, swordDebugText, new Vector2(2, 1 + (i * 15)), Color.WhiteSmoke);
                     i++;
                 }
+            }
+
+
+            //Texts
+            if (showRule)
+                spriteBatch.DrawString(font, "Dodge the swords !", new Vector2(viewport.Width / 2, viewport.Height / 2 - 20), ruleColor);
+            if (!player.isAlive)
+            {
+
+                spriteBatch.DrawString(font, "You are dead... Retry?", new Vector2(viewport.Width / 2, viewport.Height / 2), Color.WhiteSmoke);
+
+                string score = string.Format("You lasted {0} minutes and {1} seconds.", gameTime.TotalGameTime.Minutes, gameTime.TotalGameTime.Seconds);
+                spriteBatch.DrawString(font, score, new Vector2(viewport.Width / 2, viewport.Height / 2 + 40), Color.WhiteSmoke);
             }
 
             spriteBatch.End();
